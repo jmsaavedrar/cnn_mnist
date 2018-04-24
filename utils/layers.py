@@ -17,9 +17,6 @@ def gaussian_weights(shape,  mean, stddev):
                                mean = mean, 
                                stddev = stddev)
     
-def xavier_weights(shape):
-    return 0
-
 
 #convolution layer using stride = 1
 def conv_layer(input, shape, name, stride = 1):

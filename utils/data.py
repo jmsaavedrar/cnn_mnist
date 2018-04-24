@@ -50,22 +50,6 @@ def loadMNIST(pathname = ".",  dataset = "train", shuffle = True):
         labels = labels[inds]    
     return images, labels
 
-# %% read data from text files
-def readData(str_path, dataset = "train" , shuf = True):
-    datafile = str_path
-    datafile = os.path.join(str_path, dataset + ".txt")
-    print(datafile)
-    assert os.path.exists(datafile)        
-    # reading data from files  
-    with open(datafile) as file :        
-        lines = [line.rstrip() for line in file]     
-        if shuf:
-            random.shuffle(lines)
-        lines_ = [tuple(line.rstrip().split('\t'))  for line in lines ] 
-        filenames, labels = zip(*lines_)
-        labels = [int(label) for label in labels]
-    return filenames, labels
-
 #creating tfrecords
 def createTFRecord(images, labels, tfr_filename):
     h = images.shape[1]

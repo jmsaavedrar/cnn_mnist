@@ -48,11 +48,14 @@ if __name__ == '__main__':
     data_test = data_test.shuffle(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST)
     #defining saver to save snapshots
     #defining a reinitializable iterator                
-    iterator = Iterator.from_structure(data_train.output_types, data_train.output_shapes)
+    iterator = Iterator.from_structure(data_train.output_types, data_train.output_shapes)    
+    iterator_test = Iterator.from_structure(data_test.output_types, data_test.output_shapes)    
+    
     next_batch = iterator.get_next()
+    next_batch_test = iterator_test.get_next()
     #tensor that initialize the iterator:
     training_init_op = iterator.make_initializer(data_train)    
-    testing_init_op = iterator.make_initializer(data_test)    
+    testing_init_op = iterator_test.make_initializer(data_test)    
     print ("OK")
     with tf.device(device_name):
         net = mnet.net()    
@@ -96,7 +99,7 @@ if __name__ == '__main__':
                         test_loss = 0
                         test_acc = 0                          
                         for i_test in range(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST):
-                            img, label = sess.run(next_batch)
+                            img, label = sess.run(next_batch_test)
                             img_for_test = np.array([im for im in img])                        
                             loss = sess.run(net['loss'], feed_dict={net['x']: img_for_test, net['y_true']: label})
                             acc = sess.run(net['acc'], feed_dict={net['x']: img_for_test, net['y_true']: label})
@@ -104,9 +107,7 @@ if __name__ == '__main__':
                             test_acc = test_acc + acc
                         test_loss = test_loss / float(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST)
                         test_acc = test_acc / float(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST)
-                        print("Testing  loss: {} acc: {} ".format(test_loss, test_acc))
-                        #go back to training dataset
-                        sess.run(training_init_op)                    
+                        print("Testing  loss: {} acc: {} ".format(test_loss, test_acc))                                                
                 except tf.errors.OutOfRangeError:
                     sess.run(training_init_op)
                     
@@ -121,7 +122,7 @@ if __name__ == '__main__':
             test_loss = 0
             test_acc = 0
             for i_test in range(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST):
-                img, label = sess.run(next_batch)
+                img, label = sess.run(next_batch_test)
                 img_for_test = np.array([im for im in img])
                 loss = sess.run(net['loss'], feed_dict={net['x']: img_for_test, net['y_true']: label})
                 acc = sess.run(net['acc'], feed_dict={net['x']: img_for_test, net['y_true']: label})
