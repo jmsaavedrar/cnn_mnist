@@ -25,12 +25,12 @@ def conv_layer(input, shape, name, stride = 1):
     #weights for bias ares fixed as constants 0
     b = tf.Variable(tf.zeros(shape[3]), name='bias_'+name)
     return tf.nn.relu(
-            tf.contrib.layers.batch_norm(
+            tf.layers.batch_normalization(
                 tf.add(tf.nn.conv2d(
                         input, 
                         W, 
                         strides=[1, stride, stride, 1], 
-                        padding='SAME'), b)))
+                        padding='SAME'), b), scale = False, training = True))
 
 #pooling layer that uses max_pool
 def max_pool_layer(input, kernel, stride):
