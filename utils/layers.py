@@ -19,7 +19,7 @@ def gaussian_weights(shape,  mean, stddev):
     
 
 #convolution layer using stride = 1
-def conv_layer(input, shape, name, stride = 1):
+def conv_layer(input, shape, name, stride = 1, is_training = True):
     #weights are initialized according to a gaussian distribution
     W =  tf.Variable(gaussian_weights(shape, 0.0, 0.01), name=name)     
     #weights for bias ares fixed as constants 0
@@ -30,7 +30,7 @@ def conv_layer(input, shape, name, stride = 1):
                         input, 
                         W, 
                         strides=[1, stride, stride, 1], 
-                        padding='SAME'), b), scale = False, training = True))
+                        padding='SAME'), b), scale = False, training = is_training))
 
 #pooling layer that uses max_pool
 def max_pool_layer(input, kernel, stride):

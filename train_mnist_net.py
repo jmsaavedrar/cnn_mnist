@@ -70,8 +70,10 @@ if __name__ == '__main__':
         print("<<<Training Mode>>>")
         # cost optimizer
         learning_rate = 0.0001 # It seems that  Adam requires an small learning rate
-        with tf.device(device_name) :            
-            optimizer = tf.train.AdamOptimizer(learning_rate).minimize(net['loss'])
+        with tf.device(device_name) :         
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            with tf.control_dependencies(update_ops) :
+                optimizer = tf.train.AdamOptimizer(learning_rate).minimize(net['loss'])                
             
         with tf.Session() as sess:
             #-------------------initialization of variable of graph
@@ -83,10 +85,10 @@ if __name__ == '__main__':
                 try:
                     img, label = sess.run(next_batch)
                     img_for_train = np.array([im  for im in img])                        
-                    sess.run(optimizer, feed_dict={net['x']: img_for_train, net['y_true']: label})                        
+                    sess.run(optimizer, feed_dict={net['x']: img_for_train, net['y_true']: label, net['is_training'] : True })                        
                     #each 100 iterations print loss 
                     if n_iterations % 100 == 0:
-                        loss = sess.run(net['loss'], feed_dict={net['x']: img_for_train, net['y_true']: label})
+                        loss = sess.run(net['loss'], feed_dict={net['x']: img_for_train, net['y_true']: label, net['is_training'] : True})
                         print("Training iteration: {}, loss: {}".format(n_iterations, loss))
                     #each SNAPSHOT_TIME iterations save snapshots
                     if n_iterations % conf.SNAPSHOT_TIME == 0 or n_iterations == conf.NUM_ITERATIONS - 1 :
@@ -101,8 +103,8 @@ if __name__ == '__main__':
                         for i_test in range(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST):
                             img, label = sess.run(next_batch_test)
                             img_for_test = np.array([im for im in img])                        
-                            loss = sess.run(net['loss'], feed_dict={net['x']: img_for_test, net['y_true']: label})
-                            acc = sess.run(net['acc'], feed_dict={net['x']: img_for_test, net['y_true']: label})
+                            loss = sess.run(net['loss'], feed_dict={net['x']: img_for_test, net['y_true']: label, net['is_training'] : False})
+                            acc = sess.run(net['acc'], feed_dict={net['x']: img_for_test, net['y_true']: label, net['is_training'] : False})
                             test_loss = test_loss + loss
                             test_acc = test_acc + acc
                         test_loss = test_loss / float(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST)
@@ -118,14 +120,14 @@ if __name__ == '__main__':
             print ("restoring .....\n")
             #saver = tf.train.import_meta_graph('./trained/mnist_net-3000.meta')
             #saver.restore(sess,tf.train.latest_checkpoint('./trained/'))#
-            saver.restore(sess, conf.SNAPSHOT_PREFIX + '-9999')
+            saver.restore(sess, conf.SNAPSHOT_PREFIX + '-1999')
             test_loss = 0
             test_acc = 0
             for i_test in range(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST):
                 img, label = sess.run(next_batch_test)
                 img_for_test = np.array([im for im in img])
-                loss = sess.run(net['loss'], feed_dict={net['x']: img_for_test, net['y_true']: label})
-                acc = sess.run(net['acc'], feed_dict={net['x']: img_for_test, net['y_true']: label})
+                loss = sess.run(net['loss'], feed_dict={net['x']: img_for_test, net['y_true']: label, net['is_training']: False})
+                acc = sess.run(net['acc'], feed_dict={net['x']: img_for_test, net['y_true']: label, net['is_training']: False})
                 test_loss = test_loss + loss
                 test_acc = test_acc + acc
             test_loss = test_loss / float(conf.ESTIMATED_NUMBER_OF_BATCHES_TEST)
