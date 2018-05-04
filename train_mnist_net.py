@@ -70,7 +70,8 @@ if __name__ == '__main__':
         print("<<<Training Mode>>>")
         # cost optimizer
         learning_rate = 0.0001 # It seems that  Adam requires an small learning rate
-        with tf.device(device_name) :         
+        with tf.device(device_name) : 
+            #update_ops allow some parameters of BN to be updated
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops) :
                 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(net['loss'])                
